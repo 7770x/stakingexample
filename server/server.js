@@ -24,7 +24,7 @@ const signer = wallet.connect(provider);
 
 let signerAddress, balance;
 
-let rewardsToken = new ethers.Contract(rewardsTokenAddress, rewardsTokenJson.abi, provider); //read
+let rewardsToken = new ethers.Contract(rewardsTokenAddress, rewardsTokenJson.abi, signer);
 let stakingToken = new ethers.Contract(stakingTokenAddress, stakingTokenJson.abi, signer);
 let stakingRewardsContract = new ethers.Contract(stakingRewardsAddress, StakingRewardsJson.abi, signer);
 
@@ -54,10 +54,9 @@ const stake = async (amount) => {
   try {
     if (!amount) return;
     let transaction1 = await stakingToken.approve(stakingRewardsAddress, amount);
-    let tx1 = await transaction1.wait();
+    await transaction1.wait();
     let transaction2 = await stakingRewardsContract.stake(amount);
     let tx2 = await transaction2.wait();
-    console.log(`${amount} staked, hash: `, tx2.transactionHash);
     return { transactionHash: tx2.transactionHash };
   } catch (e) {
     console.log(e);
@@ -70,7 +69,6 @@ const unstake = async (amount) => {
     if (!amount) return;
     let transaction1 = await stakingRewardsContract.unstake(amount);
     let tx1 = await transaction1.wait();
-    console.log(`${amount} unstaked, hash: `, tx1.transactionHash);
     return { transactionHash: tx1.transactionHash };
   } catch (e) {
     console.log(e);
@@ -98,7 +96,6 @@ app.post("/stake", async (req, res, next) => {
   } catch (error) {
     let errMsg = error.toString();
     returnObject = { StatusText: "ERROR", Message: errMsg };
-    console.log(returnObject);
     res.send(returnObject);
     return next(error);
   }
@@ -123,7 +120,6 @@ app.post("/unstake", async (req, res, next) => {
   } catch (error) {
     let errMsg = error.toString();
     returnObject = { StatusText: "ERROR", Message: errMsg };
-    console.log(returnObject);
     res.send(returnObject);
     return next(error);
   }
@@ -141,7 +137,6 @@ app.get("/getStakingEvents", async (req, res, next) => {
         timestamp: event.args["timestamp"].toString(),
       },
     ]);
-    console.log(filtered);
     res.send({
       StatusText: "OK",
       Message: `Staking Events`,
@@ -151,8 +146,6 @@ app.get("/getStakingEvents", async (req, res, next) => {
     });
   } catch (error) {
     returnObject = { StatusText: "ERROR", Message: error.toString() };
-    console.log(returnObject);
-
     res.send(returnObject);
     return next(error);
   }
@@ -179,21 +172,15 @@ app.get("/getUnstakingEvents", async (req, res, next) => {
     });
   } catch (error) {
     returnObject = { StatusText: "ERROR", Message: error.toString() };
-    console.log(returnObject);
-
     res.send(returnObject);
     return next(error);
   }
 });
 
 app.get("/getWalletStats", async (req, res, next) => {
-  // const address = req.query.address;
   try {
     const users = await stakingRewardsContract.fetchUserArray();
-    console.log("users", users);
-
     let data = [];
-
     for (let i = 0; i < users.length; i++) {
       const balance = await stakingRewardsContract.fetchBalanceOfUser(users[i]);
 
@@ -217,7 +204,6 @@ app.get("/getWalletStats", async (req, res, next) => {
         "staking-timestamp(s)": filteredStaked,
         "unstaking-timestamp(s)": filteredUnstaked,
       });
-      console.log(data);
     }
 
     res.send({
@@ -229,8 +215,6 @@ app.get("/getWalletStats", async (req, res, next) => {
     });
   } catch (error) {
     returnObject = { StatusText: "ERROR", Message: error.toString() };
-    console.log(returnObject);
-
     res.send(returnObject);
     return next(error);
   }
@@ -243,7 +227,6 @@ app.post("/setElevatedUserAddress", async (req, res, next) => {
     let transaction1 = await stakingRewardsContract.setElevatedUserAddress(address);
     let tx1 = await transaction1.wait();
 
-    console.log(`Elevated User Address set, hash: `, tx1.transactionHash);
     res.send({
       StatusText: "OK",
       Message: `Elevated User Address set, hash`,
@@ -253,8 +236,6 @@ app.post("/setElevatedUserAddress", async (req, res, next) => {
     });
   } catch (error) {
     returnObject = { StatusText: "ERROR", Message: error.toString() };
-    console.log(returnObject);
-
     res.send(returnObject);
     return next(error);
   }
@@ -266,8 +247,6 @@ app.post("/setCanBeUsedForStaking", async (req, res, next) => {
     if (canBeUsed == undefined) return;
     let transaction1 = await stakingRewardsContract.setCanBeUsedForStaking(canBeUsed);
     let tx1 = await transaction1.wait();
-
-    console.log(`Can Be Used For Staking toggled, hash: `, tx1.transactionHash);
     res.send({
       StatusText: "OK",
       Message: `Can Be Used For Staking: ${canBeUsed}`,
@@ -277,8 +256,6 @@ app.post("/setCanBeUsedForStaking", async (req, res, next) => {
     });
   } catch (error) {
     returnObject = { StatusText: "ERROR", Message: error.toString() };
-    console.log(returnObject);
-
     res.send(returnObject);
     return next(error);
   }
@@ -286,8 +263,7 @@ app.post("/setCanBeUsedForStaking", async (req, res, next) => {
 
 app.listen(port, () =>
   console.log(`Listening on port ${port} at ${new Date().toISOString()}
-  ********** 
-  Use Postman or curl or other tools to call above endpoints, e.g. POST 1000 http://localhost:8080/stake *********** `)
+  ********** Use Postman or curl or other tools to call above endpoints, e.g. POST 1000 http://localhost:8080/stake *********** `)
 );
 
 module.exports = app;

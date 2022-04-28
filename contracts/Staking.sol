@@ -47,10 +47,7 @@ contract StakingRewards {
         _;
     }
 
-    function setElevatedUserAddress(address ElevatedUserAddress)
-        public
-        onlyOwner
-    {
+    function setElevatedUserAddress(address ElevatedUserAddress) public onlyOwner {
         _ElevatedUserAddress = ElevatedUserAddress;
     }
 
@@ -104,11 +101,7 @@ contract StakingRewards {
         _;
     }
 
-    function stake(uint256 _amount)
-        external
-        _canBeUsed
-        updateReward(msg.sender)
-    {
+    function stake(uint256 _amount) external _canBeUsed updateReward(msg.sender) {
         require(
             _amount > 10 && _amount < 1000000,
             "minimum of 10 tokens and a maximum of 1 million required"
@@ -119,19 +112,15 @@ contract StakingRewards {
             userExists[msg.sender] = true;
         }
         _balances[msg.sender] += _amount;
-        stakingToken.transferFrom(msg.sender, address(this), _amount);
         emit Staked(msg.sender, _amount, _balances[msg.sender], _now());
+        stakingToken.transferFrom(msg.sender, address(this), _amount);
     }
 
-    function unstake(uint256 _amount)
-        external
-        _canBeUsed
-        updateReward(msg.sender)
-    {
+    function unstake(uint256 _amount) external _canBeUsed updateReward(msg.sender) {
         _totalSupply -= _amount;
         _balances[msg.sender] -= _amount;
-        stakingToken.transfer(msg.sender, _amount);
         emit Unstaked(msg.sender, _amount, _balances[msg.sender], _now());
+        stakingToken.transfer(msg.sender, _amount);
     }
 
     function getReward() external _canBeUsed updateReward(msg.sender) {
@@ -141,7 +130,6 @@ contract StakingRewards {
     }
 
     function fetchBalanceOfUser(address user) public view returns (uint256) {
-        console.log("Sender balance is %s tokens", _balances[msg.sender]);
         console.log("User balance is %s tokens", _balances[user]);
         return _balances[user];
     }
