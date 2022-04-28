@@ -76,6 +76,10 @@
 
 `curl --location --request POST 'http://localhost:8080/setCanBeUsedForStaking' --data-urlencode 'canBeUsed=1'`
 
+## Testing
+
+`npx hardhat test`
+
 ## Detailed API documentation:
 
 `https://documenter.getpostman.com/view/105427/UyrEhF5f`
