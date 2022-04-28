@@ -23,25 +23,27 @@
 
 - The contract emits an event for every successful staking.
 
-````event Staked(
+> event Staked(
+
        address indexed sender,
        uint256 amount,
        uint256 balance,
        uint256 timestamp
-   );```
 
+);
 
 - A function lets you un-stake the token.
- ```curl --location --request POST 'http://localhost:8080/unstake' --data-urlencode 'amount=500'```
+  `curl --location --request POST 'http://localhost:8080/unstake' --data-urlencode 'amount=500'`
 
 - The contract emits an event for every successful un-staking.
-```   event Unstaked(
-       address indexed sender,
-       uint256 amount,
-       uint256 balance,
-       uint256 timestamp
-   );
-````
+
+  > event Unstaked(
+
+          address indexed sender,
+          uint256 amount,
+          uint256 balance,
+          uint256 timestamp
+      );
 
 - A function that provides you details of all wallets that have staked and un-staked along with the respective timestamps for each action.
 
